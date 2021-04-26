@@ -1,5 +1,5 @@
 import React from "react";
-import blank_profile from "./blank-profile-picture-female.png";
+import blank_profile from "../blank-profile-picture-female.png";
 import Skill, { SkillProps } from "./Skill";
 import { Card, List } from "../style/elements";
 

@@ -1,25 +1,30 @@
 import React, { useEffect, useState } from "react";
 import "./App.css";
+import { gql, useQuery } from "@apollo/client";
 import { CardRow, Container, Footer, Header } from "./style/elements";
 import Wilder, { WilderProps } from "./components/Wilder";
 import AddWilder from "./components/AddWilder";
 
-function App(): JSX.Element {
-  const [wilders, setWilders] = useState<WilderProps[]>([]);
-
-  useEffect(() => {
-    const fetchWilders = async () => {
-      try {
-        const result = await axios("http://localhost:5000/api/wilders");
-        setWilders(result.data.result);
-      } catch (error) {
-        console.log(error);
+const ALL_WILDERS = gql`
+  query GetAllWilders {
+    allWilders {
+      id
+      name
+      city
+      skills {
+        id
+        title
+        votes
       }
-    };
+    }
+  }
+`;
 
-    fetchWilders();
-  }, []);
-
+function App(): JSX.Element {
+  const { loading, error, data } = useQuery(ALL_WILDERS);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error :(</p>;
+  console.log(data);
   return (
     <div>
       <Header>
@@ -33,7 +38,7 @@ function App(): JSX.Element {
       <Container>
         <h2>Wilders</h2>
         <CardRow>
-          {wilders.map((wilder) => (
+          {data.allWilders.map((wilder: WilderProps) => (
             <Wilder
               key={wilder._id}
               name={wilder.name}

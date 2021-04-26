@@ -1,33 +1,37 @@
 import React, { useState } from "react";
+import { gql, useMutation } from "@apollo/client";
 import { Button, Error, Form, Input, Label } from "../style/form-elements";
+
+const CREATE_WILDER = gql`
+  mutation CreateWilder($input: InputWilder!) {
+    createWilder(input: $input) {
+      id
+      name
+      city
+    }
+  }
+`;
 
 function AddWilder(): JSX.Element {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
-  const [error, setError] = useState("");
+  const [createWilder, { error, data }] = useMutation(CREATE_WILDER);
+  console.log(data);
   return (
     <Form
-      onSubmit={async (e: { preventDefault: () => void }) => {
+      onSubmit={(e) => {
         e.preventDefault();
-        try {
-          const result = await axios.post("http://localhost:5000/api/wilders", {
-            name,
-            city,
-          });
-          console.log(result);
-          if (result.data.success) {
-            setError("");
-          }
-          // eslint-disable-next-line @typescript-eslint/no-shadow
-        } catch (error) {
-          if (error.response) {
-            setError(error.response.data.message);
-          } else {
-            setError(error.message);
-          }
-        }
+        createWilder({
+          variables: {
+            input: {
+              name,
+              city,
+            },
+          },
+        });
       }}
     >
+      {data && <p>wilder {data.createWilder.name} a été ajouté.e</p>}
       <Label htmlFor="name-input">Name :</Label>
       <Input
         id="name-input"
@@ -48,7 +52,7 @@ function AddWilder(): JSX.Element {
           setCity(e.target.value)
         }
       />
-      {error !== "" && <Error>{error}</Error>}
+      {error ? <Error>{error}</Error> : ""}
       <Button>Add</Button>
     </Form>
   );
